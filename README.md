@@ -10,18 +10,7 @@ A sophisticated Flutter application demonstrating complex custom animations with
 - **Expressive Animation**: Dynamic facial expressions, blinking eyes, and moving eyebrows
 - **Physics-Based Motion**: Natural joint articulation at shoulders, elbows, hips, and knees
 
-## Screenshots
 
-![Dancing Animation](/screenshots/dancing_animation.png)
-![Customization Options](/screenshots/customization_options.png)
-
-## Video Demo
-
-<div align="center">
-  <video src="https://github.com/yourusername/animation_test/raw/main/screenshots/animation_demo.mp4" width="320" height="640" controls></video>
-</div>
-
-*Note: Replace the placeholder links above with actual screenshots and video once captured.*
 
 ## Implementation Details
 
