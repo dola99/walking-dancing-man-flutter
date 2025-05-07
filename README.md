@@ -1,16 +1,78 @@
-# animation_test
+# Flutter Dancing Animation
 
-A new Flutter project.
+A sophisticated Flutter application demonstrating complex custom animations with a dancing human figure. This project showcases advanced animation techniques using CustomPaint, multiple animation controllers, and trigonometric functions to create fluid, lifelike movements.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Realistic Human Figure**: Anatomically proportioned figure with detailed limbs and facial features
+- **Complex Dance Movements**: Fluid dance animations with coordinated arm and leg movements
+- **Interactive Customization**: Change the dancer's color, size, and dance floor background
+- **Expressive Animation**: Dynamic facial expressions, blinking eyes, and moving eyebrows
+- **Physics-Based Motion**: Natural joint articulation at shoulders, elbows, hips, and knees
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+![Dancing Animation](/screenshots/dancing_animation.png)
+![Customization Options](/screenshots/customization_options.png)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Video Demo
+
+<div align="center">
+  <video src="https://github.com/yourusername/animation_test/raw/main/screenshots/animation_demo.mp4" width="320" height="640" controls></video>
+</div>
+
+*Note: Replace the placeholder links above with actual screenshots and video once captured.*
+
+## Implementation Details
+
+This animation is built using several advanced Flutter animation techniques:
+
+- **CustomPaint**: Draws the human figure using path-based rendering
+- **Multiple AnimationControllers**: Coordinates different body parts with varied timing
+- **Trigonometric Functions**: Creates natural, physics-based movement patterns
+- **Transform Widgets**: Applies rotation and positioning effects
+- **Matrix Operations**: Handles complex transformations for realistic movement
+
+## Dance Animation Features
+
+The dancing animation includes:
+
+- Body bouncing to simulate dancing to a beat
+- Arm movements with enhanced range and expressiveness
+- Leg movements with realistic hip and knee articulation
+- Subtle body rotation for natural dancing feel
+- Expressive facial features that react to the dance rhythm
+- Hand rotations and gestures to match the dance style
+
+## How to Use
+
+1. Clone this repository
+2. Run `flutter pub get` to install dependencies
+3. Launch with `flutter run`
+4. Use the controls at the bottom of the screen to customize:
+   - Dancer color
+   - Dancer size
+   - Dance floor background
+   - Dance style
+
+## Code Structure
+
+- `walking_animation.dart`: Core animation implementation with CustomPaint
+- `walking_screen.dart`: UI for displaying and controlling the animation
+- `main.dart`: App entry point and configuration
+
+## Requirements
+
+- Flutter 3.0+
+- Dart 3.0+
+
+## Future Improvements
+
+- Add different dance styles with distinct movement patterns
+- Implement music detection to sync dance moves with rhythm
+- Add shadow effects for enhanced visual appeal
+- Create multiple character options
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

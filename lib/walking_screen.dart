@@ -13,8 +13,8 @@ class _WalkingScreenState extends State<WalkingScreen> {
   double _characterWidth = 150;
   double _characterHeight = 300;
   bool _showControls = true;
-  double _walkingSpeed = 1.0;
-  Color _backgroundColor1 = Colors.lightBlue[100]!;
+  double _danceSpeed = 1.0;
+  Color _backgroundColor1 = Colors.purple[100]!;
   Color _backgroundColor2 = Colors.white;
 
   final List<Color> _skinColors = [
@@ -28,11 +28,11 @@ class _WalkingScreenState extends State<WalkingScreen> {
   ];
 
   final List<List<Color>> _backgroundOptions = [
-    [Colors.lightBlue[100]!, Colors.white],
-    [Colors.green[100]!, Colors.white],
-    [Colors.grey[300]!, Colors.white],
-    [Colors.orange[100]!, Colors.white],
     [Colors.purple[100]!, Colors.white],
+    [Colors.blue[100]!, Colors.white],
+    [Colors.grey[200]!, Colors.grey[50]!],
+    [Colors.orange[100]!, Colors.yellow[50]!],
+    [Colors.pink[100]!, Colors.white],
   ];
 
   int _currentBackgroundIndex = 0;
@@ -41,7 +41,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Realistic Human Walking Animation'),
+        title: const Text('Dancing Animation'),
         backgroundColor: _backgroundColor1.withOpacity(0.7),
         actions: [
           IconButton(
@@ -86,7 +86,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Customize Realistic Human:',
+                        'Customize Dancer:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -94,7 +94,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'Character Color:',
+                        'Dancer Color:',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 6),
@@ -118,7 +118,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          const Text('Character Size: '),
+                          const Text('Dancer Size: '),
                           Expanded(
                             child: Slider(
                               value: _characterWidth,
@@ -138,7 +138,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'Background:',
+                        'Dance Floor:',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 6),
@@ -186,17 +186,17 @@ class _WalkingScreenState extends State<WalkingScreen> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          const Text('Walking Speed: '),
+                          const Text('Dance Style: '),
                           Expanded(
                             child: Slider(
-                              value: _walkingSpeed,
+                              value: _danceSpeed,
                               min: 0.5,
                               max: 1.5,
                               divisions: 4,
-                              label: _getSpeedLabel(_walkingSpeed),
+                              label: _getDanceStyleLabel(_danceSpeed),
                               onChanged: (value) {
                                 setState(() {
-                                  _walkingSpeed = value;
+                                  _danceSpeed = value;
                                 });
                               },
                             ),
@@ -206,7 +206,7 @@ class _WalkingScreenState extends State<WalkingScreen> {
                       const SizedBox(height: 12),
                       Center(
                         child: Text(
-                          'This figure features realistic anatomy with proper proportions,\nnatural joint movement, and anatomical details',
+                          'Dancing human with realistic movements,\nexpressive face and fluid dance moves!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
@@ -224,11 +224,11 @@ class _WalkingScreenState extends State<WalkingScreen> {
     );
   }
 
-  String _getSpeedLabel(double speed) {
-    if (speed <= 0.6) return 'Slow';
-    if (speed <= 0.9) return 'Normal';
-    if (speed <= 1.2) return 'Fast';
-    return 'Very Fast';
+  String _getDanceStyleLabel(double speed) {
+    if (speed <= 0.6) return 'Slow Dance';
+    if (speed <= 0.9) return 'Rhythm Dance';
+    if (speed <= 1.2) return 'Fast Dance';
+    return 'Party Mode';
   }
 }
 

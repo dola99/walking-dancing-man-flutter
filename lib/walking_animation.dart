@@ -19,39 +19,40 @@ class WalkingAnimation extends StatefulWidget {
 
 class _WalkingAnimationState extends State<WalkingAnimation>
     with TickerProviderStateMixin {
-  late AnimationController _walkController;
-  late Animation<double> _walkAnimation;
+  late AnimationController _mainController;
+  late Animation<double> _mainAnimation;
 
   late AnimationController _armController;
   late AnimationController _legController;
   late AnimationController _breathingController;
   late AnimationController _headBobController;
+  late AnimationController _bounceController;
+  late AnimationController _spinController;
 
-  late AnimationController _positionController;
   late Animation<Offset> _positionAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _walkController = AnimationController(
+    _mainController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    _walkAnimation = CurvedAnimation(
-      parent: _walkController,
+    _mainAnimation = CurvedAnimation(
+      parent: _mainController,
       curve: Curves.linear,
     );
 
     _armController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 780),
+      duration: const Duration(milliseconds: 600), // Faster for dance moves
     )..repeat(reverse: true);
 
     _legController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400), // Faster for dance moves
     )..repeat(reverse: true);
 
     _breathingController = AnimationController(
@@ -61,30 +62,36 @@ class _WalkingAnimationState extends State<WalkingAnimation>
 
     _headBobController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 500), // Faster for dance moves
     )..repeat(reverse: true);
 
-    _positionController = AnimationController(
+    _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15),
+      duration: const Duration(milliseconds: 800),
     )..repeat(reverse: true);
+
+    _spinController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
 
     _positionAnimation = Tween<Offset>(
-      begin: const Offset(-0.5, 0),
-      end: const Offset(0.5, 0),
+      begin: const Offset(-0.2, 0),
+      end: const Offset(0.2, 0),
     ).animate(
-      CurvedAnimation(parent: _positionController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
   }
 
   @override
   void dispose() {
-    _walkController.dispose();
+    _mainController.dispose();
     _armController.dispose();
     _legController.dispose();
     _breathingController.dispose();
     _headBobController.dispose();
-    _positionController.dispose();
+    _bounceController.dispose();
+    _spinController.dispose();
     super.dispose();
   }
 
@@ -94,22 +101,29 @@ class _WalkingAnimationState extends State<WalkingAnimation>
       position: _positionAnimation,
       child: AnimatedBuilder(
         animation: Listenable.merge([
-          _walkAnimation,
+          _mainAnimation,
           _armController,
           _legController,
           _breathingController,
           _headBobController,
+          _bounceController,
+          _spinController,
         ]),
         builder: (context, child) {
-          return CustomPaint(
-            size: Size(widget.width, widget.height),
-            painter: RealisticHumanPainter(
-              walkAnimation: _walkController.value,
-              armAnimation: _armController.value,
-              legAnimation: _legController.value,
-              breathingAnimation: _breathingController.value,
-              headBobAnimation: _headBobController.value,
-              color: widget.color,
+          return Transform.rotate(
+            angle: _spinController.value * 2 * math.pi / 8, // Subtle rotation
+            child: CustomPaint(
+              size: Size(widget.width, widget.height),
+              painter: DancingHumanPainter(
+                mainAnimation: _mainController.value,
+                armAnimation: _armController.value,
+                legAnimation: _legController.value,
+                breathingAnimation: _breathingController.value,
+                headBobAnimation: _headBobController.value,
+                bounceAnimation: _bounceController.value,
+                spinAnimation: _spinController.value,
+                color: widget.color,
+              ),
             ),
           );
         },
@@ -118,20 +132,24 @@ class _WalkingAnimationState extends State<WalkingAnimation>
   }
 }
 
-class RealisticHumanPainter extends CustomPainter {
-  final double walkAnimation;
+class DancingHumanPainter extends CustomPainter {
+  final double mainAnimation;
   final double armAnimation;
   final double legAnimation;
   final double breathingAnimation;
   final double headBobAnimation;
+  final double bounceAnimation;
+  final double spinAnimation;
   final Color color;
 
-  RealisticHumanPainter({
-    required this.walkAnimation,
+  DancingHumanPainter({
+    required this.mainAnimation,
     required this.armAnimation,
     required this.legAnimation,
     required this.breathingAnimation,
     required this.headBobAnimation,
+    required this.bounceAnimation,
+    required this.spinAnimation,
     required this.color,
   });
 
@@ -160,9 +178,13 @@ class RealisticHumanPainter extends CustomPainter {
           ..color = Colors.brown.shade800
           ..style = PaintingStyle.fill;
 
+    final bounceOffset = math.sin(bounceAnimation * math.pi) * 10;
+
     final center = Offset(
       size.width / 2,
-      size.height / 2 + math.sin(headBobAnimation * 2 * math.pi) * 2,
+      size.height / 2 +
+          bounceOffset -
+          math.sin(headBobAnimation * 2 * math.pi) * 5,
     );
 
     final headHeight = size.height * 0.13;
@@ -247,11 +269,20 @@ class RealisticHumanPainter extends CustomPainter {
     canvas.drawPath(torsoPath, musclePaint);
     canvas.drawPath(torsoPath, paint);
 
-    final leftArmAngle = math.sin(armAnimation * math.pi) * 0.5;
-    final rightArmAngle = -math.sin(armAnimation * math.pi) * 0.5;
+    // Dance moves - exaggerated angles and movement
+    final leftArmAngle =
+        math.sin(armAnimation * math.pi) * 2.0 +
+        math.pi / 4 * math.sin(mainAnimation * 2 * math.pi);
+    final rightArmAngle =
+        -math.sin(armAnimation * math.pi) * 2.0 -
+        math.pi / 4 * math.sin(mainAnimation * 2 * math.pi + math.pi / 2);
 
-    final leftLegAngle = math.sin(legAnimation * math.pi) * 0.35;
-    final rightLegAngle = -math.sin(legAnimation * math.pi) * 0.35;
+    final leftLegAngle =
+        math.sin(legAnimation * math.pi) * 0.7 +
+        math.sin(bounceAnimation * math.pi) * 0.3;
+    final rightLegAngle =
+        -math.sin(legAnimation * math.pi) * 0.7 -
+        math.sin(bounceAnimation * math.pi) * 0.3;
 
     final leftShoulderPoint = Offset(center.dx - shoulderWidth / 2, shoulderY);
     final rightShoulderPoint = Offset(center.dx + shoulderWidth / 2, shoulderY);
@@ -292,14 +323,12 @@ class RealisticHumanPainter extends CustomPainter {
 
     canvas.drawLine(leftElbowPoint, leftWristPoint, paint);
 
-    // Draw right arm with realistic joint articulation
     final rightElbowAngle = rightArmAngle * 0.8;
     final rightElbowPoint = Offset(
       rightShoulderPoint.dx + upperArmLength * math.sin(rightArmAngle),
       rightShoulderPoint.dy + upperArmLength * math.cos(rightArmAngle),
     );
 
-    // Upper arm muscles
     final rightUpperArmPath =
         Path()
           ..moveTo(rightShoulderPoint.dx, rightShoulderPoint.dy)
@@ -308,10 +337,8 @@ class RealisticHumanPainter extends CustomPainter {
           ..close();
     canvas.drawPath(rightUpperArmPath, musclePaint);
 
-    // Draw upper arm
     canvas.drawLine(rightShoulderPoint, rightElbowPoint, paint);
 
-    // Lower arm
     final rightWristPoint = Offset(
       rightElbowPoint.dx +
           lowerArmLength * math.sin(rightArmAngle + rightElbowAngle),
@@ -319,7 +346,6 @@ class RealisticHumanPainter extends CustomPainter {
           lowerArmLength * math.cos(rightArmAngle + rightElbowAngle),
     );
 
-    // Lower arm muscles
     final rightLowerArmPath =
         Path()
           ..moveTo(rightElbowPoint.dx, rightElbowPoint.dy)
@@ -330,14 +356,13 @@ class RealisticHumanPainter extends CustomPainter {
 
     canvas.drawLine(rightElbowPoint, rightWristPoint, paint);
 
-    // Draw left leg with realistic joint movement
-    final leftKneeAngle = leftLegAngle * 0.6;
+    final leftKneeAngle =
+        leftLegAngle * 0.6 + math.sin(bounceAnimation * math.pi) * 0.5;
     final leftKneePoint = Offset(
       leftHipPoint.dx + upperLegLength * math.sin(leftLegAngle),
       leftHipPoint.dy + upperLegLength * math.cos(leftLegAngle),
     );
 
-    // Upper leg muscles - thicker for realism
     final leftThighPath =
         Path()
           ..moveTo(leftHipPoint.dx, leftHipPoint.dy)
@@ -346,10 +371,8 @@ class RealisticHumanPainter extends CustomPainter {
           ..close();
     canvas.drawPath(leftThighPath, musclePaint);
 
-    // Draw upper leg
     canvas.drawLine(leftHipPoint, leftKneePoint, paint);
 
-    // Lower leg
     final leftAnklePoint = Offset(
       leftKneePoint.dx +
           lowerLegLength * math.sin(leftLegAngle + leftKneeAngle),
@@ -357,7 +380,6 @@ class RealisticHumanPainter extends CustomPainter {
           lowerLegLength * math.cos(leftLegAngle + leftKneeAngle),
     );
 
-    // Calf muscles
     final leftCalfPath =
         Path()
           ..moveTo(leftKneePoint.dx, leftKneePoint.dy)
@@ -368,14 +390,14 @@ class RealisticHumanPainter extends CustomPainter {
 
     canvas.drawLine(leftKneePoint, leftAnklePoint, paint);
 
-    // Draw right leg with realistic joint movement
-    final rightKneeAngle = rightLegAngle * 0.6;
+    final rightKneeAngle =
+        rightLegAngle * 0.6 +
+        math.sin(bounceAnimation * math.pi + math.pi) * 0.5;
     final rightKneePoint = Offset(
       rightHipPoint.dx + upperLegLength * math.sin(rightLegAngle),
       rightHipPoint.dy + upperLegLength * math.cos(rightLegAngle),
     );
 
-    // Upper leg muscles
     final rightThighPath =
         Path()
           ..moveTo(rightHipPoint.dx, rightHipPoint.dy)
@@ -384,10 +406,8 @@ class RealisticHumanPainter extends CustomPainter {
           ..close();
     canvas.drawPath(rightThighPath, musclePaint);
 
-    // Draw upper leg
     canvas.drawLine(rightHipPoint, rightKneePoint, paint);
 
-    // Lower leg
     final rightAnklePoint = Offset(
       rightKneePoint.dx +
           lowerLegLength * math.sin(rightLegAngle + rightKneeAngle),
@@ -395,7 +415,6 @@ class RealisticHumanPainter extends CustomPainter {
           lowerLegLength * math.cos(rightLegAngle + rightKneeAngle),
     );
 
-    // Calf muscles
     final rightCalfPath =
         Path()
           ..moveTo(rightKneePoint.dx, rightKneePoint.dy)
@@ -406,17 +425,19 @@ class RealisticHumanPainter extends CustomPainter {
 
     canvas.drawLine(rightKneePoint, rightAnklePoint, paint);
 
-    // Add realistic feet with proper angle
     final footLength = size.width * 0.1;
 
-    // Left foot with proper angle relative to leg
-    final leftFootAngle = leftLegAngle + leftKneeAngle - math.pi / 2;
+    // Dancing feet - more rotation based on bounce animation
+    final leftFootAngle =
+        leftLegAngle +
+        leftKneeAngle -
+        math.pi / 2 +
+        math.sin(bounceAnimation * math.pi) * 0.5;
     final leftFootEndPoint = Offset(
       leftAnklePoint.dx + footLength * math.cos(leftFootAngle),
       leftAnklePoint.dy + footLength * math.sin(leftFootAngle),
     );
 
-    // Draw foot as a path for more realistic shape
     final leftFootPath =
         Path()
           ..moveTo(leftAnklePoint.dx, leftAnklePoint.dy)
@@ -438,14 +459,16 @@ class RealisticHumanPainter extends CustomPainter {
     canvas.drawPath(leftFootPath, skinPaint);
     canvas.drawPath(leftFootPath, paint);
 
-    // Right foot with proper angle relative to leg
-    final rightFootAngle = rightLegAngle + rightKneeAngle - math.pi / 2;
+    final rightFootAngle =
+        rightLegAngle +
+        rightKneeAngle -
+        math.pi / 2 +
+        math.sin(bounceAnimation * math.pi + math.pi) * 0.5;
     final rightFootEndPoint = Offset(
       rightAnklePoint.dx + footLength * math.cos(rightFootAngle),
       rightAnklePoint.dy + footLength * math.sin(rightFootAngle),
     );
 
-    // Draw foot as a path
     final rightFootPath =
         Path()
           ..moveTo(rightAnklePoint.dx, rightAnklePoint.dy)
@@ -467,11 +490,20 @@ class RealisticHumanPainter extends CustomPainter {
     canvas.drawPath(rightFootPath, skinPaint);
     canvas.drawPath(rightFootPath, paint);
 
-    // Add hands (ovals for more realistic shape)
+    // Dancing hands - make them more expressive
     final handWidth = headWidth * 0.35;
     final handHeight = headHeight * 0.25;
 
-    // Left hand
+    // Add hand rotation for dance moves
+    final leftHandRotation = math.sin(mainAnimation * 2 * math.pi) * 0.5;
+    final rightHandRotation =
+        math.sin(mainAnimation * 2 * math.pi + math.pi) * 0.5;
+
+    canvas.save();
+    canvas.translate(leftWristPoint.dx, leftWristPoint.dy);
+    canvas.rotate(leftHandRotation);
+    canvas.translate(-leftWristPoint.dx, -leftWristPoint.dy);
+
     final leftHandRect = Rect.fromCenter(
       center: leftWristPoint,
       width: handWidth,
@@ -479,8 +511,13 @@ class RealisticHumanPainter extends CustomPainter {
     );
     canvas.drawOval(leftHandRect, skinPaint);
     canvas.drawOval(leftHandRect, paint);
+    canvas.restore();
 
-    // Right hand
+    canvas.save();
+    canvas.translate(rightWristPoint.dx, rightWristPoint.dy);
+    canvas.rotate(rightHandRotation);
+    canvas.translate(-rightWristPoint.dx, -rightWristPoint.dy);
+
     final rightHandRect = Rect.fromCenter(
       center: rightWristPoint,
       width: handWidth,
@@ -488,19 +525,22 @@ class RealisticHumanPainter extends CustomPainter {
     );
     canvas.drawOval(rightHandRect, skinPaint);
     canvas.drawOval(rightHandRect, paint);
+    canvas.restore();
 
-    // Add a more realistic face
     final eyeOffset = headWidth * 0.2;
     final eyeY = faceCenter.dy - headHeight * 0.1;
     final eyeSize = headWidth * 0.08;
 
-    // Draw eyes with white sclera and colored iris
+    // Add blinking for dancing
+    final eyeOpenAmount =
+        math.sin(mainAnimation * 12 * math.pi) > 0.8 ? 0.3 : 1.0;
+
     // Left eye
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(faceCenter.dx - eyeOffset, eyeY),
         width: eyeSize * 1.8,
-        height: eyeSize,
+        height: eyeSize * eyeOpenAmount,
       ),
       Paint()..color = Colors.white,
     );
@@ -516,7 +556,7 @@ class RealisticHumanPainter extends CustomPainter {
       Rect.fromCenter(
         center: Offset(faceCenter.dx + eyeOffset, eyeY),
         width: eyeSize * 1.8,
-        height: eyeSize,
+        height: eyeSize * eyeOpenAmount,
       ),
       Paint()..color = Colors.white,
     );
@@ -527,18 +567,35 @@ class RealisticHumanPainter extends CustomPainter {
       Paint()..color = Colors.black,
     );
 
-    // Eyebrows
+    // Eyebrows - more expressive for dancing
+    final leftEyebrowLift =
+        math.sin(mainAnimation * 2 * math.pi) * eyeSize * 0.8;
+    final rightEyebrowLift =
+        math.sin(mainAnimation * 2 * math.pi + math.pi / 2) * eyeSize * 0.8;
+
     canvas.drawLine(
-      Offset(faceCenter.dx - eyeOffset - eyeSize * 0.5, eyeY - eyeSize * 1.2),
-      Offset(faceCenter.dx - eyeOffset + eyeSize * 0.5, eyeY - eyeSize * 0.8),
+      Offset(
+        faceCenter.dx - eyeOffset - eyeSize * 0.5,
+        eyeY - eyeSize * 1.2 - leftEyebrowLift,
+      ),
+      Offset(
+        faceCenter.dx - eyeOffset + eyeSize * 0.5,
+        eyeY - eyeSize * 0.8 - leftEyebrowLift,
+      ),
       Paint()
         ..color = Colors.brown.shade800
         ..strokeWidth = 2.0,
     );
 
     canvas.drawLine(
-      Offset(faceCenter.dx + eyeOffset - eyeSize * 0.5, eyeY - eyeSize * 0.8),
-      Offset(faceCenter.dx + eyeOffset + eyeSize * 0.5, eyeY - eyeSize * 1.2),
+      Offset(
+        faceCenter.dx + eyeOffset - eyeSize * 0.5,
+        eyeY - eyeSize * 0.8 - rightEyebrowLift,
+      ),
+      Offset(
+        faceCenter.dx + eyeOffset + eyeSize * 0.5,
+        eyeY - eyeSize * 1.2 - rightEyebrowLift,
+      ),
       Paint()
         ..color = Colors.brown.shade800
         ..strokeWidth = 2.0,
@@ -554,14 +611,16 @@ class RealisticHumanPainter extends CustomPainter {
 
     canvas.drawPath(nosePath, skinPaint);
 
-    // Mouth - slightly smiling
+    // Dancing smile - bigger smile with animation
     final mouthY = faceCenter.dy + headHeight * 0.2;
+    final smileHeight =
+        eyeSize * (2.0 + math.sin(mainAnimation * 2 * math.pi) * 1.0);
     final mouthPath =
         Path()
           ..moveTo(faceCenter.dx - eyeOffset, mouthY)
           ..quadraticBezierTo(
             faceCenter.dx,
-            mouthY + eyeSize * 2,
+            mouthY + smileHeight,
             faceCenter.dx + eyeOffset,
             mouthY,
           );
@@ -618,12 +677,14 @@ class RealisticHumanPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(RealisticHumanPainter oldDelegate) {
-    return oldDelegate.walkAnimation != walkAnimation ||
+  bool shouldRepaint(DancingHumanPainter oldDelegate) {
+    return oldDelegate.mainAnimation != mainAnimation ||
         oldDelegate.armAnimation != armAnimation ||
         oldDelegate.legAnimation != legAnimation ||
         oldDelegate.breathingAnimation != breathingAnimation ||
         oldDelegate.headBobAnimation != headBobAnimation ||
+        oldDelegate.bounceAnimation != bounceAnimation ||
+        oldDelegate.spinAnimation != spinAnimation ||
         oldDelegate.color != color;
   }
 }
